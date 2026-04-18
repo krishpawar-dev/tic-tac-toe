@@ -14,10 +14,10 @@ function App() {
     newBoard[index] = isXTurn ? "X" : "O";
 
     setBoard(newBoard);
-    setIsXTurn(!isXTurn);
+    setIsXTurn((prev) => !prev); // ✅ safer toggle
   };
 
-  const checkWinner = () => {
+  const checkWinner = (currentBoard) => {
     const wins = [
       [0, 1, 2],
       [3, 4, 5],
@@ -30,21 +30,29 @@ function App() {
     ];
 
     for (let [a, b, c] of wins) {
-      if (board[a] && board[a] === board[b] && board[b] === board[c]) {
-        setResult(board[a] + " wins");
-        setGameOver(true);
-        return;
+      if (
+        currentBoard[a] &&
+        currentBoard[a] === currentBoard[b] &&
+        currentBoard[b] === currentBoard[c]
+      ) {
+        return currentBoard[a] + " wins";
       }
     }
 
-    if (board.every(cell => cell !== "")) {
-      setResult("Draw");
-      setGameOver(true);
+    if (currentBoard.every(cell => cell !== "")) {
+      return "Draw";
     }
+
+    return null;
   };
 
   useEffect(() => {
-    checkWinner();
+    const result = checkWinner(board);
+
+    if (result) {
+      setResult(result);
+      setGameOver(true);
+    }
   }, [board]);
 
   const restart = () => {
@@ -58,6 +66,11 @@ function App() {
     <div className="App">
       <h1>Tic Tac Toe</h1>
 
+      {/* ✅ Show turn */}
+      {!gameOver && (
+        <h2>Turn: {isXTurn ? "X" : "O"}</h2>
+      )}
+
       <div className="board">
         {board.map((cell, index) => (
           <div
@@ -70,7 +83,8 @@ function App() {
         ))}
       </div>
 
-      <h2>{result}</h2>
+      {/* ✅ Result */}
+      {result && <h2>{result}</h2>}
 
       <button onClick={restart}>Restart</button>
     </div>
